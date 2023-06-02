@@ -1,5 +1,17 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <div style="">
+    <header>header</header>
+    <div style="border: 1px solid black; position: fixed">helo</div>
+    <div style="border: 1px solid gold">hello</div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {};
+  },
+  computed: {},
+};
+</script>
+<style lang="scss"></style>

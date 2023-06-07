@@ -1,8 +1,8 @@
 <template>
-  <div style="">
-    <header>header</header>
-    <div style="border: 1px solid black; position: fixed">helo</div>
-    <div style="border: 1px solid gold">hello</div>
+  <div class="main">
+    <span style="border: 1px solid red; margin-left: auto"
+      >张三，李四，11111111111111111</span
+    >
   </div>
 </template>
 
@@ -11,7 +11,15 @@ export default {
   data() {
     return {};
   },
-  computed: {},
+
+  methods: {},
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.main {
+  margin: 0 auto;
+  border: 1px solid red;
+  height: 100px;
+  width: 600px;
+}
+</style>

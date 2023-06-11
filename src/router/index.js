@@ -26,6 +26,11 @@ const routes = [
     name: "page3",
     component: () => import("../views/PageThree.vue"),
   },
+  {
+    path: "/page4",
+    name: "page4",
+    component: () => import("../views/PageFour.vue"),
+  },
 ];
 
 const router = new VueRouter({

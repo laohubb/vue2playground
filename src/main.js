@@ -12,7 +12,7 @@ import VConsole from "vconsole";
 const vconsole = new VConsole();
 // 可选：在开发环境下自动显示 VConsole
 if (process.env.NODE_ENV === "development") {
-  vconsole.show();
+  // vconsole.show();
 }
 Vue.use(Vant);
 Vue.use(ElementUI);

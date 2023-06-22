@@ -19,6 +19,7 @@ export default {
   methods: {
     handleEnter() {
       this.$toast("回车键被点击");
+      console.log("hello");
     },
   },
 };

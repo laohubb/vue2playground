@@ -12,6 +12,7 @@ module.exports = {
     parser: "@babel/eslint-parser",
   },
   rules: {
+    "*": "off",
     "vue/no-unused-components": "off",
     "no-unused-vars": "off",
     "prettier/prettier": ["error", { endOfLine: "auto" }],

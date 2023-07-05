@@ -6,6 +6,8 @@
       <router-link to="/page2">page2</router-link>
       <router-link to="/page3">page3</router-link>
       <router-link to="/page4">page4</router-link>
+      <router-link to="/page5">page5</router-link>
+      <router-link to="/page6">page6</router-link>
     </nav>
     <router-view />
   </div>

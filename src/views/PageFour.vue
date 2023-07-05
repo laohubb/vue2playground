@@ -1,70 +1,127 @@
 <template>
-  <div ref="elem" class="container">
-    <van-cell is-link @click="show = true">展示弹出层</van-cell>
-    <van-popup v-model="show">内容</van-popup>
-    <div class="content">
-      {{ left }}
-
-      <div style="width: 50vw">elemRect{{ elemRect }}</div>
-      <div>touchstartX{{ touchstartX }}</div>
-      <div>touchendX{{ touchendX }}</div>
-    </div>
+  <div class="box">
+    <input type="file" accept="image/gif" @change="handleFileUpload" />
+    <img
+      :src="imgURL"
+      :style="{ transform: `scale(${scale})` }"
+      alt=""
+      style="max-width: 100vw"
+    />
+    <el-slider
+      v-model="scale"
+      :min="0.1"
+      :max="1"
+      :step="0.1"
+      style="width: 80vw"
+    ></el-slider>
+    <button @click="mountFile">开始渲染</button>
   </div>
 </template>
 
 <script>
+import GIF from "gif.js";
+//eslint-disable-next-line
+import { decompressFrames, parseGIF } from "gifuct-js";
+
 export default {
-  name: "PageFour",
-  mounted() {
-    const elem = this.$refs.elem;
-    function preventTouchMove(event) {
-      event.preventDefault();
-    }
-    const onTouchStart = (event) => {
-      this.touchstartX = event.touches[0].clientX;
-      if (this.touchstartX < 50) {
-        this.left = true;
-        elem.addEventListener("touchmove", preventTouchMove, {
-          passive: false,
-        });
-      } else {
-        this.left = false;
-        elem.removeEventListener("touchmove", preventTouchMove);
-      }
-    };
-
-    elem.addEventListener("touchstart", onTouchStart);
-
-    this.$once("hook:beforeDestroy", () => {
-      elem.removeEventListener("touchstart", onTouchStart);
-    });
-  },
   data() {
     return {
-      show: false,
-      touchstartX: 0,
-      touchendX: 0,
-      left: false,
-      elemRect: {},
+      scale: 1,
+      imgUint8Array: null,
+      picsList: [],
+      file: null,
+      imgURL: null,
+      result: false,
     };
   },
   methods: {
-    preventBack() {},
-    yidong() {
-      console.log("边缘移动");
+    handleFileUpload(event) {
+      this.file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        this.imgURL = event.target.result;
+      };
+      reader.readAsDataURL(this.file);
+    },
+    mountFile() {
+      this.picsList = [];
+      const reader = new FileReader();
+      // 将文件读取为二进制数据
+      reader.readAsArrayBuffer(this.file);
+      reader.onload = () => {
+        this.imgUint8Array = new Uint8Array(reader.result);
+        this.startRendering();
+      };
+    },
+    startRendering() {
+      const gif = parseGIF(this.imgUint8Array);
+      const frames = decompressFrames(gif, true);
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        const canvas = document.createElement("canvas");
+        canvas.width = frame.dims.width;
+        canvas.height = frame.dims.height;
+        const context = canvas.getContext("2d");
+        const imageData = context.createImageData(
+          frame.dims.width,
+          frame.dims.height
+        );
+        imageData.data.set(frame.patch);
+        context.putImageData(imageData, 0, 0);
+
+        // 对Canvas进行等比例缩小
+        const scaledCanvas = document.createElement("canvas");
+        const scaleRatio = this.scale; // 缩放比例为0.5
+        scaledCanvas.width = canvas.width * scaleRatio;
+        scaledCanvas.height = canvas.height * scaleRatio;
+        const scaledContext = scaledCanvas.getContext("2d");
+        scaledContext.drawImage(
+          canvas,
+          0,
+          0,
+          scaledCanvas.width,
+          scaledCanvas.height
+        );
+
+        const image = new Image();
+        image.src = scaledCanvas.toDataURL();
+        this.picsList.push(image);
+        // document.body.appendChild(image);
+      }
+      setTimeout(() => {
+        this.transToGif();
+      }, 100);
+    },
+    transToGif() {
+      //eslint-disable-next-line
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+      });
+
+      for (let i = 0; i < this.picsList.length; i++) {
+        gif.addFrame(this.picsList[i], { delay: 100 });
+      }
+      this.result = true;
+      // 渲染GIF
+      gif.on("finished", function (blob) {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(blob);
+        document.body.appendChild(img);
+      });
+
+      // 开始生成GIF
+      gif.render();
     },
   },
 };
 </script>
 
-<style scoped>
-.container {
+<style scoped lang="scss">
+.box {
   width: 100vw;
-  height: 120vh;
-  /*border: 1px solid red;*/
-}
-
-.content {
-  /* 根据需要设置内容的样式 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

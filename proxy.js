@@ -1,9 +1,28 @@
 var httpProxy = require("http-proxy");
+var os = require("os");
 
-var proxy = httpProxy.createProxyServer({
-  target: "http://localhost:8080",
-  ws: true,
-});
+var interfaces = os.networkInterfaces();
 
-proxy.listen(8081, "192.168.137.1");
-console.log(`Proxy server is running at: http://${"192.168.137.1"}:${8081}`);
+for (var devName in interfaces) {
+  var iface = interfaces[devName];
+
+  for (var i = 0; i < iface.length; i++) {
+    var alias = iface[i];
+
+    if (
+      alias.family === "IPv4" &&
+      alias.address !== "127.0.0.1" &&
+      !alias.internal
+    ) {
+      var proxy = httpProxy.createProxyServer({
+        target: `http://${alias.address}:8080`,
+        ws: true,
+      });
+
+      proxy.listen(8081, alias.address);
+      console.log(
+        `Proxy server is running at: http://${alias.address}:${8081}`
+      );
+    }
+  }
+}

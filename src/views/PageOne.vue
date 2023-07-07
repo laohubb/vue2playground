@@ -8,7 +8,7 @@
           </div>
         </template>
         <van-collapse v-model="activeNames2">
-          <van-collapse-item title="标题1" name="7" :is-link="false">
+          <van-collapse-item name="7" :is-link="false">
             <template #title>
               <div>
                 <i class="van-icon van-icon-arrow van-cell__right-icon" />标签1
@@ -40,5 +40,14 @@ export default {
 }
 ::v-deep .van-collapse-item__title--expanded::after {
   border: unset !important;
+}
+::v-deep .van-cell {
+  padding: 0 !important;
+}
+.van-collapse-item__title .van-cell__right-icon::before {
+  transform: rotate(0deg);
+}
+.van-collapse-item__title--expanded .van-cell__right-icon::before {
+  transform: rotate(90deg);
 }
 </style>

@@ -1,127 +1,97 @@
 <template>
-  <div class="box">
-    <input type="file" accept="image/gif" @change="handleFileUpload" />
-    <img
-      :src="imgURL"
-      :style="{ transform: `scale(${scale})` }"
-      alt=""
-      style="max-width: 100vw"
-    />
-    <el-slider
-      v-model="scale"
-      :min="0.1"
-      :max="1"
-      :step="0.1"
-      style="width: 80vw"
-    ></el-slider>
-    <button @click="mountFile">开始渲染</button>
+  <div>
+    <el-cascader
+      :options="options"
+      v-model="selectedTag"
+      clearable
+      class="my-cascader"
+      @change="handleChange"
+    ></el-cascader>
+
+    <div class="tag-box">
+      <el-tag
+        v-for="tag in tags"
+        :key="tag.name"
+        closable
+        :type="tag.type"
+        class="tag-item"
+      >
+        {{ tag.name }}
+      </el-tag>
+    </div>
   </div>
 </template>
 
 <script>
-import GIF from "gif.js";
-//eslint-disable-next-line
-import { decompressFrames, parseGIF } from "gifuct-js";
-
 export default {
   data() {
     return {
-      scale: 1,
-      imgUint8Array: null,
-      picsList: [],
-      file: null,
-      imgURL: null,
-      result: false,
+      selectedTag: [],
+      options: [
+        {
+          value: "group1",
+          label: "分组一",
+          children: [
+            {
+              value: "member1",
+              label: "员工一",
+            },
+            {
+              value: "member2",
+              label: "员工二",
+            },
+          ],
+        },
+        {
+          value: "group2",
+          label: "分组二",
+          children: [
+            {
+              value: "member3",
+              label: "员工三",
+            },
+            {
+              value: "member4",
+              label: "员工四",
+            },
+          ],
+        },
+      ],
+      tags: [
+        { name: "标签一", type: "" },
+        { name: "标签2", type: "" },
+        { name: "3", type: "" },
+        { name: "标签sadfasdfasdfasd一", type: "" },
+        { name: "34", type: "" },
+      ],
     };
   },
   methods: {
-    handleFileUpload(event) {
-      this.file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        this.imgURL = event.target.result;
-      };
-      reader.readAsDataURL(this.file);
-    },
-    mountFile() {
-      this.picsList = [];
-      const reader = new FileReader();
-      // 将文件读取为二进制数据
-      reader.readAsArrayBuffer(this.file);
-      reader.onload = () => {
-        this.imgUint8Array = new Uint8Array(reader.result);
-        this.startRendering();
-      };
-    },
-    startRendering() {
-      const gif = parseGIF(this.imgUint8Array);
-      const frames = decompressFrames(gif, true);
-      for (let i = 0; i < frames.length; i++) {
-        const frame = frames[i];
-        const canvas = document.createElement("canvas");
-        canvas.width = frame.dims.width;
-        canvas.height = frame.dims.height;
-        const context = canvas.getContext("2d");
-        const imageData = context.createImageData(
-          frame.dims.width,
-          frame.dims.height
-        );
-        imageData.data.set(frame.patch);
-        context.putImageData(imageData, 0, 0);
-
-        // 对Canvas进行等比例缩小
-        const scaledCanvas = document.createElement("canvas");
-        const scaleRatio = this.scale; // 缩放比例为0.5
-        scaledCanvas.width = canvas.width * scaleRatio;
-        scaledCanvas.height = canvas.height * scaleRatio;
-        const scaledContext = scaledCanvas.getContext("2d");
-        scaledContext.drawImage(
-          canvas,
-          0,
-          0,
-          scaledCanvas.width,
-          scaledCanvas.height
-        );
-
-        const image = new Image();
-        image.src = scaledCanvas.toDataURL();
-        this.picsList.push(image);
-        // document.body.appendChild(image);
-      }
-      setTimeout(() => {
-        this.transToGif();
-      }, 100);
-    },
-    transToGif() {
-      //eslint-disable-next-line
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-      });
-
-      for (let i = 0; i < this.picsList.length; i++) {
-        gif.addFrame(this.picsList[i], { delay: 100 });
-      }
-      this.result = true;
-      // 渲染GIF
-      gif.on("finished", function (blob) {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(blob);
-        document.body.appendChild(img);
-      });
-
-      // 开始生成GIF
-      gif.render();
+    handleChange() {
+      console.log(this.selectedTag);
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.box {
-  width: 100vw;
+.tag-box {
+  border: 1px solid red;
+  margin-left: 400px;
+  width: 500px;
+  height: 100px;
+  overflow: auto;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tag-item {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
 }
 </style>
